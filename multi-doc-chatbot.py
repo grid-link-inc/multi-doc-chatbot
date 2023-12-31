@@ -8,28 +8,35 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 load_dotenv(".env")
 
 documents = []
 # Create a List of Documents from all of our files in the ./docs folder
-for file in os.listdir("docs"):
-    if file.endswith(".pdf"):
-        pdf_path = "./docs/" + file
-        loader = PyPDFLoader(pdf_path)
-        documents.extend(loader.load())
-    elif file.endswith(".docx") or file.endswith(".doc"):
-        doc_path = "./docs/" + file
-        loader = Docx2txtLoader(doc_path)
-        documents.extend(loader.load())
-    elif file.endswith(".txt"):
-        text_path = "./docs/" + file
-        loader = TextLoader(text_path)
-        documents.extend(loader.load())
+files_to_import = os.listdir("docs")
+num_files = str(len(files_to_import))
+for i, file in enumerate(files_to_import):
+    print("Importing: " + file + " (" + str(i + 1) + "/" + num_files + ")")
+    try:
+        if file.endswith(".pdf"):
+            pdf_path = "./docs/" + file
+            loader = PyPDFLoader(pdf_path)
+            documents.extend(loader.load())
+        elif file.endswith(".docx") or file.endswith(".doc"):
+            doc_path = "./docs/" + file
+            loader = Docx2txtLoader(doc_path)
+            documents.extend(loader.load())
+        elif file.endswith(".txt"):
+            text_path = "./docs/" + file
+            loader = TextLoader(text_path)
+            documents.extend(loader.load())
+    except Exception as e:
+        print("Error importing file: " + file)
+        print(e)
 
 # Split the documents into smaller chunks
-text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=10)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 documents = text_splitter.split_documents(documents)
 
 # Convert the document chunks to embedding and save them to the vector store
