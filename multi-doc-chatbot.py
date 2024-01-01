@@ -17,7 +17,7 @@ documents = []
 files_to_import = os.listdir("docs")
 num_files = str(len(files_to_import))
 for i, file in enumerate(files_to_import):
-    print("Importing: " + file + " (" + str(i + 1) + "/" + num_files + ")")
+    print(f"Importing: {file} {i+1} / {num_files}")
     try:
         if file.endswith(".pdf"):
             pdf_path = "./docs/" + file
